@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public class GuiController : MonoBehaviour {
 
@@ -28,7 +29,7 @@ public class GuiController : MonoBehaviour {
 	#endregion
 
 	#region Delegate Declarations
-	public delegate void MenuClickAction(GameObject relatedObject, string command);
+	public delegate void MenuClickAction(GameObject relatedObject, int commandIndex);
 	public static event MenuClickAction OnClickedMenu;
 
 	public delegate void MouseClickAction();
@@ -56,12 +57,12 @@ public class GuiController : MonoBehaviour {
 
 	void OnGUI(){
 		if (SelectionMenu != null && !SelectionMenu.MenuClosed) {
-			string command = SelectionMenu.Show();
+			ContentId command = SelectionMenu.Show();
 
 			if(SelectionMenu != null && command != null)
 			{
 				GameObject relObj = SelectionMenu.RelatedObj;
-				OnClickedMenu(relObj, command);
+				OnClickedMenu(relObj, command.Id);
 			}
 		}
 	}
@@ -123,20 +124,30 @@ public class GuiController : MonoBehaviour {
 		textObject.text = string.Concat(valueString,"%");
 	}
 	
-	public static void CreateMenu(GameObject forObject, GUIContent[] gcArr)
+	public static void CreateMenu(GameObject forObject, List<int> commandIds)
 	{
+		List<ContentId> guiContents = new List<ContentId>();
+
+		foreach(int commandId in commandIds)
+		{
+			ContentId contentId = new ContentId(commandId, 
+			                          new GUIContent(CommandController.Instance.GetLabelFromIndex(commandId)));
+
+			guiContents.Add(contentId);
+		}
+
 		float x = MousePositionCurrent.x;
 		float y = MousePositionCurrent.y;
 		Rect rect = new Rect(x, y, 150f, 50f);
 		
-		SelectionMenu = new Popup (rect, gcArr, GUIStyle.none, forObject);
+		SelectionMenu = new Popup (rect, guiContents, GUIStyle.none, forObject);
 	}
 
 	public static void CloseCurrentMenu()
 	{
 		bool overGUI = false;
 		
-		if(SelectionMenu != null && SelectionMenu.ListRect != null)
+		if(SelectionMenu != null)
 		{
 			overGUI = SelectionMenu.ListRect.Contains(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y));
 		}

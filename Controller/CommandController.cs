@@ -1,18 +1,38 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 #region Client and Invoker
-public static class CommandController {
+public class CommandController {
 	static ActionReceiver receiver = null;
 	static CommandAbstract command = null;
-	static CommandInvoker invoker = null;
+	static List<CommandInvoker> Invokers = null;
 	
 	static HackCommand hackCmd = null;
 	static DestroyCommand destroyCmd = null;
 
-	public static void NewCommand(ActionListEnum actionType, GameObject targetServer)
+	static CommandController instance = null;
+	public static CommandController Instance
+	{
+		get{
+			if(instance == null)
+			{
+				instance = new CommandController();
+			}
+			
+			return instance;
+		}
+		set
+		{ }
+	}
+
+	public void CommmandController()
+	{
+		Invokers = new List<CommandInvoker>();
+	}
+
+	public int NewCommand(ActionListEnum actionType, GameObject targetServer)
 	{
 		receiver = new GameObjectCommand(targetServer);
-		invoker = new CommandInvoker();
 		
 		if(actionType== ActionListEnum.Hack)
 			command = new HackCommand(receiver);
@@ -20,16 +40,39 @@ public static class CommandController {
 		else if(actionType== ActionListEnum.Destroy)
 			command = new DestroyCommand(receiver);
 		
-		invoker.SetCommand(command);
-		invoker.ExecuteCommand();
+		CommandInvoker invoker = new CommandInvoker(command);
+		Invokers.Add(invoker);
+
+		int invokerIndex = Invokers.IndexOf(invoker);
+
+		return invokerIndex;
 	}
+
+	public string GetLabelFromIndex(int index)
+	{
+		return Invokers[index].Command.Label;
+	}
+
+	public void ExcecuteCommandFromIndex(int index)
+	{
+		Invokers[index].ExecuteCommand();
+	}
+
 }
 
 class CommandInvoker
 {
-	CommandAbstract Command;
-	
-	public void SetCommand(CommandAbstract command)
+	public CommandAbstract Command;
+
+	public CommandInvoker()
+	{ }
+
+	public CommandInvoker(CommandAbstract command)
+	{
+		SetCommand(command);
+	}
+
+	void SetCommand(CommandAbstract command)
 	{
 		Command = command;
 	}
@@ -87,10 +130,12 @@ class GameObjectCommand : ActionReceiver
 abstract class CommandAbstract
 {
 	public ActionReceiver Receiver = null;
-	
+	public string Label;
+
 	public CommandAbstract(ActionReceiver receiver)
 	{
 		Receiver = receiver;
+		Label = "No Label";
 	}
 	
 	public abstract void Execute();
@@ -101,7 +146,9 @@ abstract class CommandAbstract
 class HackCommand : CommandAbstract
 {
 	public HackCommand(ActionReceiver receiver) : base(receiver)
-	{ }
+	{ 
+		Label = "Hack!";
+	}
 
 	public override void Execute()
 	{
@@ -113,7 +160,9 @@ class HackCommand : CommandAbstract
 class DestroyCommand : CommandAbstract
 {
 	public DestroyCommand(ActionReceiver receiver) : base(receiver)
-	{ }
+	{
+		Label = "Destroy!";
+	}
 	
 	public override void Execute()
 	{

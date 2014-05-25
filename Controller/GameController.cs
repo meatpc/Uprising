@@ -26,7 +26,7 @@ public class GameController : MonoBehaviour
 		RaycastHit hit;
 		Ray ray;
 
-		GameObject hitObject = new GameObject("No Object");
+		GameObject hitObject = null;
 
 		ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 		if (Physics.Raycast(ray, out hit))
@@ -37,17 +37,25 @@ public class GameController : MonoBehaviour
 			}
 		}
 
-		AddLog("Click On Object", GuiController.MousePositionCurrent, hitObject.gameObject.name);
-
 		switch (GuiController.MouseClickInputCurrent)
 		{
 			case GuiController.MouseClickInputs.LeftClick:
+				if(hitObject != null)
+				{
+					AddLog("Left Click On Object", GuiController.MousePositionCurrent, hitObject.name);
+				}
+
 				CameraController.WorldPointDragStartPosition = GuiController.MousePositionCurrent;
 				GuiController.CloseCurrentMenu();
 				break;
 
 			case GuiController.MouseClickInputs.RightClick:
-				OpenActionMenu(hitObject);
+				if(hitObject != null)
+				{
+					AddLog("Right Click On Object", GuiController.MousePositionCurrent, hitObject.name);
+					OpenActionMenu(hitObject);
+				}
+
 				break;
 
 			case GuiController.MouseClickInputs.LeftDrag:
@@ -61,33 +69,23 @@ public class GameController : MonoBehaviour
 	
 	static void OpenActionMenu(GameObject hitObject)
 	{
-		if(ObjectController.ServerObjects.Contains(hitObject))
+		if(ObjectController.AllSystemObjects.FindIndex(m => m.InternalGameObject.GetInstanceID().Equals(hitObject.GetInstanceID())) >= 0 )
 		{
 			GameObject server = hitObject;
-			
-			GUIContent hack = new GUIContent("Hack!");
-			GUIContent destroy = new GUIContent("Destroy!");
-			GUIContent[] gcArr = new GUIContent[2];
-			gcArr [0] = hack;
-			gcArr [1] = destroy;
-			
+
+			List<int> commandIds = new List<int>();
+			commandIds.Add(CommandController.Instance.NewCommand (ActionListEnum.Hack, server));
+			commandIds.Add(CommandController.Instance.NewCommand (ActionListEnum.Destroy, server));
+
 			GuiController.OnClickedMenu += OnMenuClick;
-			GuiController.CreateMenu(hitObject, gcArr);
+			GuiController.CreateMenu(hitObject, commandIds);
 		}
 	}
 	
-	static void OnMenuClick(GameObject relatedObject, string command)
+	static void OnMenuClick(GameObject relatedObject, int commandIndex)
 	{
-		switch(command)
-		{
-			case "Hack!":
-				CommandController.NewCommand (ActionListEnum.Hack, relatedObject);
-				break;
-			case "Destroy!":
-				DestroyImmediate(relatedObject, true);
-				break;
-		}
-		
+		CommandController.Instance.ExcecuteCommandFromIndex(commandIndex);
+
 		GuiController.OnClickedMenu -= OnMenuClick;
 	}
 

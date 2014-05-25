@@ -6,7 +6,7 @@ public class ObjectController : MonoBehaviour {
 	public static GameObject ServerTemplate;
 	public static LineRenderer LineTemplate;
 
-	public static List<GameObject> ServerObjects;
+	public static List<GameSystemAbstract> AllSystemObjects;
 	public static List<ServerConnection> ServerConnections;
 	public static List<LineRenderer> ServerLines;
 
@@ -18,7 +18,7 @@ public class ObjectController : MonoBehaviour {
 		c1 = Color.blue;
 		c2 = Color.blue;
 
-		ServerObjects = new List<GameObject>();
+		AllSystemObjects = new List<GameSystemAbstract>();
 		ServerConnections = new List<ServerConnection>();
 		ServerLines = new List<LineRenderer>();
 
@@ -28,25 +28,26 @@ public class ObjectController : MonoBehaviour {
 		if(ServerTemplate != null)
 		{
 			Quaternion rot = new Quaternion();
-			GameObject server1 = (GameObject)Instantiate(ServerTemplate, new Vector3(0,0,0), rot);
-			server1.name = "a";
-			ServerObjects.Add(server1);
 
-			GameObject server2 = (GameObject)Instantiate(ServerTemplate, new Vector3(-7,5,0), rot);
-			server2.name = "b";
-			ServerObjects.Add(server2);
+			Server server1 = new Server((GameObject)Instantiate(ServerTemplate, new Vector3(0,0,0), rot));
+			server1.InternalGameObject.name = "server1";
+			AllSystemObjects.Add(server1);
 
-			GameObject server3 = (GameObject)Instantiate(ServerTemplate, new Vector3(5,-6,0), rot);
-			server3.name = "c";
-			ServerObjects.Add(server3);
+			Server server2 = new Server((GameObject)Instantiate(ServerTemplate, new Vector3(-7,5,0), rot));
+			server2.InternalGameObject.name = "server2";
+			AllSystemObjects.Add(server2);
 
-			GameObject server4 = (GameObject)Instantiate(ServerTemplate, new Vector3(2.5f,6.35f,0), rot);
-			server4.name = "d";
-			ServerObjects.Add(server4);
+            Server server3 = new Server((GameObject)Instantiate(ServerTemplate, new Vector3(5,-6,0), rot));
+			server3.InternalGameObject.name = "server3";
+			AllSystemObjects.Add(server3);
 
-			GameObject server5 = (GameObject)Instantiate(ServerTemplate, new Vector3(2.7f,-11,0), rot);
-			server5.name = "e";
-			ServerObjects.Add(server5);
+			Server server4 = new Server((GameObject)Instantiate(ServerTemplate, new Vector3(2.5f,6.35f,0), rot));
+			server4.InternalGameObject.name = "server4";
+			AllSystemObjects.Add(server4);
+
+			Server server5 = new Server((GameObject)Instantiate(ServerTemplate, new Vector3(2.7f,-11,0), rot));
+			server5.InternalGameObject.name = "server5";
+			AllSystemObjects.Add(server5);
 
 			ServerConnections.Add(new ServerConnection(server1, server2));
 			ServerConnections.Add(new ServerConnection(server2, server4));
@@ -64,8 +65,8 @@ public class ObjectController : MonoBehaviour {
 			LineRenderer line1 = (LineRenderer)Instantiate(LineTemplate);
 			line1.SetVertexCount(2);
 
-			line1.SetPosition(0, s.O1.transform.position);
-			line1.SetPosition(1, s.O2.transform.position);
+			line1.SetPosition(0, s.O1.InternalGameObject.transform.position);
+			line1.SetPosition(1, s.O2.InternalGameObject.transform.position);
 
 			ServerLines.Add(line1);
 		}
@@ -74,12 +75,36 @@ public class ObjectController : MonoBehaviour {
 
 public class ServerConnection
 {
-	public GameObject O1;
-	public GameObject O2;
+	public GameSystemAbstract O1;
+	public GameSystemAbstract O2;
 
-	public ServerConnection(GameObject a, GameObject b)
+	public ServerConnection(GameSystemAbstract a, GameSystemAbstract b)
 	{
 		O1 = a;
 		O2 = b;
+	}
+}
+
+public abstract class GameSystemAbstract
+{
+	public GameObject InternalGameObject;
+
+	public GameSystemAbstract()
+	{
+	}
+
+	public GameSystemAbstract(GameObject internalObject) : base()
+	{
+		InternalGameObject = internalObject;
+	}
+}
+
+public class Server : GameSystemAbstract
+{
+	public GameObject ProgressBar;
+
+	public Server(GameObject gameObject) : base(gameObject)
+	{
+	    DecoratorController.AddProgressBarToObject(this);
 	}
 }

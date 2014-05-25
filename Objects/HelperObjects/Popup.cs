@@ -1,4 +1,17 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
+
+public class ContentId
+{
+	public int Id;
+	public GUIContent Content;
+
+	public ContentId (int id, GUIContent content)
+	{
+		Id = id;
+		Content = content;
+	}
+}
 
 public class Popup
 {
@@ -10,49 +23,58 @@ public class Popup
 	static float listRectHeight = 1.5f;
 	int newSelectedItemIndex = -1;
 	int selectedItemIndex = -1;
-	GUIContent buttonContent;
-	GUIContent[] listContent;
+
+	ContentId SpecificContentId;
+	List<ContentId> ContentIdList;
+
 	string buttonStyle;
 	string boxStyle;
 	GUIStyle listStyle;
 	Rect inputRect;
 
-	public Popup(Rect rect, GUIContent[] listContent, GUIStyle listStyle, GameObject relatedObject)
+	public Popup(Rect rect, List<ContentId> listContent, GUIStyle listStyle, GameObject relatedObject)
 	{
 		this.inputRect = rect;
-		this.listContent = listContent;
+		this.ContentIdList = listContent;
 		this.buttonStyle = "button";
 		this.boxStyle = "box";
 		this.listStyle = listStyle;
 		this.RelatedObj = relatedObject;
 
 		ListRect = new Rect(inputRect.x, inputRect.y, inputRect.width, listStyle.CalcHeight
-		                    (listContent [0], 1.0f) * listRectHeight * listContent.Length);
+		                    ((ContentIdList [0]).Content, 1.0f) * listRectHeight * ContentIdList.Count);
 
 		MenuClosed = false;
 	}
   
-	public Popup(Rect rect, GUIContent[] listContent, string buttonStyle, string boxStyle, GUIStyle listStyle, GameObject relatedObject)
+	public Popup(Rect rect, List<ContentId> listContent, string buttonStyle, string boxStyle, GUIStyle listStyle, GameObject relatedObject)
 	{
 		this.inputRect = rect;
-		this.listContent = listContent;
+		this.ContentIdList = listContent;
 		this.buttonStyle = buttonStyle;
 		this.boxStyle = boxStyle;
 		this.listStyle = listStyle;
 		this.RelatedObj = relatedObject;
 
 		ListRect = new Rect(inputRect.x, inputRect.y, inputRect.width, listStyle.CalcHeight
-		                    (listContent [0], 1.0f) * listRectHeight * listContent.Length);
+		                    ((ContentIdList [0]).Content, 1.0f) * listRectHeight * ContentIdList.Count);
 
 		MenuClosed = false;
 	}
   
-	public string Show()
+	public ContentId Show()
 	{
 		int controlID = GUIUtility.GetControlID(FocusType.Passive);       
 		EventType evtType = Event.current.GetTypeForControl(controlID);
 
-		newSelectedItemIndex = GUI.SelectionGrid(ListRect, selectedItemIndex, listContent, 1, buttonStyle);
+		List<GUIContent> guiContentList = new List<GUIContent>();
+
+		foreach(ContentId cId in ContentIdList)
+		{
+			guiContentList.Add(cId.Content);
+		}
+
+		newSelectedItemIndex = GUI.SelectionGrid(ListRect, selectedItemIndex, guiContentList.ToArray(), 1, buttonStyle);
 
 		if (GUI.changed)
 		{
@@ -63,22 +85,16 @@ public class Popup
 					if (newSelectedItemIndex != selectedItemIndex)
 					{
 						selectedItemIndex = newSelectedItemIndex;
-						buttonContent = listContent [selectedItemIndex];
+						SpecificContentId = (ContentIdList [selectedItemIndex]);
 						MenuClosed = true;
-						GameController.AddLog("Menu Selection", buttonContent.text, RelatedObj.name);
+
+						//GameController.AddLog("Menu Selection", buttonContent.text, RelatedObj.name);
 					}
 					break;
 				}
 			}
 		}
 
-		string selectedAction = null;
-
-		if(buttonContent != null)
-		{
-			selectedAction = buttonContent.text;
-		}
-
-		return selectedAction;
+		return SpecificContentId;
 	}
 }

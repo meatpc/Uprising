@@ -142,6 +142,7 @@ public class CameraController : MonoBehaviour {
 		Vector3 WorldPointDragTarget = PosToWorldPoint(ScreenPointDragEndPosition);
 		WorldPointCameraTarget = new Vector3(((WorldPointDragStartPosition.x - WorldPointDragTarget.x) * dragSpeedx), ((WorldPointDragStartPosition.y - WorldPointDragTarget.y) * dragSpeedy), 0);
 
+
 		return true;
 	}
 
@@ -154,7 +155,6 @@ public class CameraController : MonoBehaviour {
 		   && System.Math.Abs(WorldPointCameraTarget.y - WorldPointDeltaTarget.y) < minDragDistance)
 		{
 			//GameController.AddLog("Camera inactive at Pos", GuiController.MousePositionCurrent, "");
-			
 			isCameraMoving = false;
 			isActiveScreenPointDragEndPosition = false;
 		}
