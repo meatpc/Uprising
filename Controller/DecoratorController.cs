@@ -10,6 +10,22 @@ public class DecoratorController : MonoBehaviour {
 		TextFieldDecorator newFldDecorator = new TextFieldDecorator(comp);
 		newFldDecorator.Operation();
 	}
+
+	public static void MakeFriendly(GameSystemAbstract obj)
+	{
+		ConcreteComponent comp = new ConcreteComponent(obj);
+		
+		FriendlyObject newFldDecorator = new FriendlyObject(comp);
+		newFldDecorator.Operation();
+	}
+
+	public static void MakeHostile(GameSystemAbstract obj)
+	{
+		ConcreteComponent comp = new ConcreteComponent(obj);
+		
+		TextFieldDecorator newFldDecorator = new TextFieldDecorator(comp);
+		newFldDecorator.Operation();
+	}
 }
 
 #region Setup
@@ -90,6 +106,56 @@ class TextFieldDecorator : Decorator
 			progressBar.transform.localPosition = new Vector3(0.3f, -1, 0);
 			
 			serverObject.ProgressBar = progressBar;
+		}
+	}
+}
+
+class FriendlyObject : Decorator
+{
+	public FriendlyObject(ConcreteComponent component) : base(component)
+	{}
+	
+	public override void Operation()
+	{
+		base.Operation();
+		AddedBehaviour();
+	}
+	
+	void AddedBehaviour()
+	{
+		Sprite spriteGreen = (Sprite) Resources.Load<Sprite>("server-icon_green");
+
+		if(spriteGreen != null)
+		{
+			Server serverObject = (Server) Component.RelatedObj;
+			SpriteRenderer sprite = (SpriteRenderer) serverObject.InternalGameObject.GetComponent(typeof(SpriteRenderer));
+
+			sprite.sprite = spriteGreen;
+		}
+	}
+}
+
+class HostileObject : Decorator
+{
+	public HostileObject(ConcreteComponent component) : base(component)
+	{}
+	
+	public override void Operation()
+	{
+		base.Operation();
+		AddedBehaviour();
+	}
+	
+	void AddedBehaviour()
+	{
+		Sprite spriteGreen = (Sprite) Resources.Load<Sprite>("server-icon_red");
+		
+		if(spriteGreen != null)
+		{
+			Server serverObject = (Server) Component.RelatedObj;
+			SpriteRenderer sprite = (SpriteRenderer) serverObject.InternalGameObject.GetComponent(typeof(SpriteRenderer));
+			
+			sprite.sprite = spriteGreen;
 		}
 	}
 }

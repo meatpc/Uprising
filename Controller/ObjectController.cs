@@ -65,8 +65,8 @@ public class ObjectController : MonoBehaviour {
 			LineRenderer line1 = (LineRenderer)Instantiate(LineTemplate);
 			line1.SetVertexCount(2);
 
-			line1.SetPosition(0, s.O1.InternalGameObject.transform.position);
-			line1.SetPosition(1, s.O2.InternalGameObject.transform.position);
+			line1.SetPosition(0, s.GameSystem1.InternalGameObject.transform.position);
+			line1.SetPosition(1, s.GameSystem2.InternalGameObject.transform.position);
 
 			ServerLines.Add(line1);
 		}
@@ -75,13 +75,13 @@ public class ObjectController : MonoBehaviour {
 
 public class ServerConnection
 {
-	public GameSystemAbstract O1;
-	public GameSystemAbstract O2;
+	public GameSystemAbstract GameSystem1;
+	public GameSystemAbstract GameSystem2;
 
-	public ServerConnection(GameSystemAbstract a, GameSystemAbstract b)
+	public ServerConnection(GameSystemAbstract game1, GameSystemAbstract game2)
 	{
-		O1 = a;
-		O2 = b;
+		GameSystem1 = game1;
+		GameSystem2 = game2;
 	}
 }
 
@@ -102,9 +102,25 @@ public abstract class GameSystemAbstract
 public class Server : GameSystemAbstract
 {
 	public GameObject ProgressBar;
-
+	
 	public Server(GameObject gameObject) : base(gameObject)
 	{
-	    DecoratorController.AddProgressBarToObject(this);
+		InternalGameObject = gameObject;
+		DecoratorController.AddProgressBarToObject(this);
+
+		ServerObjectLogic serverScript = gameObject.GetComponent<ServerObjectLogic>();
+		serverScript.OnHackingFinished += OnHackingFinished;
+	}
+
+	public void OnHackingFinished(float progress)
+	{
+		if(progress == 100.0f)
+		{
+			DecoratorController.MakeFriendly(this);
+		}
+		else if(progress == 0.0f)
+		{
+			DecoratorController.MakeHostile(this);
+		}
 	}
 }

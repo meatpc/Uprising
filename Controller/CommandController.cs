@@ -54,7 +54,6 @@ public class CommandController : MonoBehaviour {
 	{
 		Invokers[index].ExecuteCommand();
 	}
-
 }
 
 class CommandInvoker
