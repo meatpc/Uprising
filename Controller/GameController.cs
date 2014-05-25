@@ -46,7 +46,10 @@ public class GameController : MonoBehaviour
 				}
 
 				CameraController.WorldPointDragStartPosition = GuiController.MousePositionCurrent;
-				GuiController.CloseCurrentMenu();
+
+				if(GuiController.ShouldCloseCurrentMenu())
+					GuiController.OnClickedMenu -= OnMenuClick;
+					
 				break;
 
 			case GuiController.MouseClickInputs.RightClick:
@@ -71,11 +74,9 @@ public class GameController : MonoBehaviour
 	{
 		if(ObjectController.AllSystemObjects.FindIndex(m => m.InternalGameObject.GetInstanceID().Equals(hitObject.GetInstanceID())) >= 0 )
 		{
-			GameObject server = hitObject;
-
 			List<int> commandIds = new List<int>();
-			commandIds.Add(CommandController.Instance.NewCommand (ActionListEnum.Hack, server));
-			commandIds.Add(CommandController.Instance.NewCommand (ActionListEnum.Destroy, server));
+			commandIds.Add(CommandController.Instance.CreateCommand (ActionListEnum.Hack, hitObject));
+			commandIds.Add(CommandController.Instance.CreateCommand (ActionListEnum.Destroy, hitObject));
 
 			GuiController.OnClickedMenu += OnMenuClick;
 			GuiController.CreateMenu(hitObject, commandIds);
@@ -85,7 +86,6 @@ public class GameController : MonoBehaviour
 	static void OnMenuClick(GameObject relatedObject, int commandIndex)
 	{
 		CommandController.Instance.ExcecuteCommandFromIndex(commandIndex);
-
 		GuiController.OnClickedMenu -= OnMenuClick;
 	}
 

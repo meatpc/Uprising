@@ -36,8 +36,10 @@ public class GuiController : MonoBehaviour {
 	public static event MouseClickAction OnClickedMouse;
 	#endregion
 
+	#region Enum Declaration
 	public enum MouseClickInputs {None, LeftClick, RightClick, LeftDrag, RightDrag}
 	public static MouseClickInputs MouseClickInputCurrent;
+	#endregion
 
 	// Use this for initialization
 	void Start () {
@@ -130,8 +132,8 @@ public class GuiController : MonoBehaviour {
 
 		foreach(int commandId in commandIds)
 		{
-			ContentId contentId = new ContentId(commandId, 
-			                          new GUIContent(CommandController.Instance.GetLabelFromIndex(commandId)));
+			GUIContent guiContent = new GUIContent(CommandController.Instance.GetLabelFromIndex(commandId));
+			ContentId contentId = new ContentId(commandId, guiContent);
 
 			guiContents.Add(contentId);
 		}
@@ -143,7 +145,7 @@ public class GuiController : MonoBehaviour {
 		SelectionMenu = new Popup (rect, guiContents, GUIStyle.none, forObject);
 	}
 
-	public static void CloseCurrentMenu()
+	public static bool ShouldCloseCurrentMenu()
 	{
 		bool overGUI = false;
 		
@@ -155,7 +157,9 @@ public class GuiController : MonoBehaviour {
 		if(!overGUI)
 		{
 			SelectionMenu = null;
+			return true;
 		}
+		return false;
 	}
 
 

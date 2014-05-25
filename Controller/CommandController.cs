@@ -1,36 +1,31 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-#region Client and Invoker
-public class CommandController {
-	static ActionReceiver receiver = null;
-	static CommandAbstract command = null;
-	static List<CommandInvoker> Invokers = null;
-	
-	static HackCommand hackCmd = null;
-	static DestroyCommand destroyCmd = null;
 
-	static CommandController instance = null;
+#region Client and Invoker
+public class CommandController : MonoBehaviour {
+	ActionReceiver receiver;
+	CommandAbstract command;
+	List<CommandInvoker> Invokers;
+
+	HackCommand hackCmd;
+	DestroyCommand destroyCmd;
+
+	static readonly CommandController instance = new CommandController();
 	public static CommandController Instance
 	{
-		get{
-			if(instance == null)
-			{
-				instance = new CommandController();
-			}
-			
+		get
+		{
 			return instance;
 		}
-		set
-		{ }
 	}
 
-	public void CommmandController()
+	public CommandController()
 	{
 		Invokers = new List<CommandInvoker>();
 	}
 
-	public int NewCommand(ActionListEnum actionType, GameObject targetServer)
+	public int CreateCommand(ActionListEnum actionType, GameObject targetServer)
 	{
 		receiver = new GameObjectCommand(targetServer);
 		
@@ -50,7 +45,9 @@ public class CommandController {
 
 	public string GetLabelFromIndex(int index)
 	{
-		return Invokers[index].Command.Label;
+		CommandInvoker invoker = Invokers[index];
+		string label = invoker.Command.Label;
+		return label;
 	}
 
 	public void ExcecuteCommandFromIndex(int index)
