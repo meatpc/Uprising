@@ -29,8 +29,8 @@ public class ObjectController : MonoBehaviour {
 		{
 			Quaternion rot = new Quaternion();
 
-			Server server1 = new Server((GameObject)Instantiate(ServerTemplate, new Vector3(0,0,0), rot));
-			server1.InternalGameObject.name = "server1";
+			Gateway server1 = new Gateway((GameObject)Instantiate(ServerTemplate, new Vector3(0,0,0), rot));
+			server1.InternalGameObject.name = "gateway1";
 			AllSystemObjects.Add(server1);
 
 			Server server2 = new Server((GameObject)Instantiate(ServerTemplate, new Vector3(-7,5,0), rot));
@@ -99,14 +99,23 @@ public abstract class GameSystemAbstract
 	}
 }
 
+public class Gateway : GameSystemAbstract
+{
+	public Gateway(GameObject gameObject) : base(gameObject)
+	{
+		DecoratorController.MakeGateway(this);
+	}
+
+}
+
 public class Server : GameSystemAbstract
 {
 	public GameObject ProgressBar;
 	
 	public Server(GameObject gameObject) : base(gameObject)
 	{
-		InternalGameObject = gameObject;
 		DecoratorController.AddProgressBarToObject(this);
+		DecoratorController.MakeNeutral(this);
 
 		ServerObjectLogic serverScript = gameObject.GetComponent<ServerObjectLogic>();
 		serverScript.OnHackingFinished += OnHackingFinished;

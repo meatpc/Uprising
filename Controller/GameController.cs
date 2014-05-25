@@ -72,14 +72,22 @@ public class GameController : MonoBehaviour
 	
 	static void OpenActionMenu(GameObject hitObject)
 	{
-		if(ObjectController.AllSystemObjects.FindIndex(m => m.InternalGameObject.GetInstanceID().Equals(hitObject.GetInstanceID())) >= 0 )
-		{
-			List<int> commandIds = new List<int>();
-			commandIds.Add(CommandController.Instance.CreateCommand (ActionListEnum.Hack, hitObject));
-			commandIds.Add(CommandController.Instance.CreateCommand (ActionListEnum.Destroy, hitObject));
+		int i = ObjectController.AllSystemObjects.FindIndex(m => m.InternalGameObject.GetInstanceID().Equals(hitObject.GetInstanceID()));
 
-			GuiController.OnClickedMenu += OnMenuClick;
-			GuiController.CreateMenu(hitObject, commandIds);
+		if(i >= 0)
+		{
+			GameSystemAbstract currentSystem = ObjectController.AllSystemObjects[i];
+			System.Type typeOfObject = currentSystem.GetType();
+
+			if(typeOfObject.Equals(typeof(Server)))
+			{
+				List<int> commandIds = new List<int>();
+				commandIds.Add(CommandController.Instance.CreateCommand (ActionListEnum.Hack, hitObject));
+				commandIds.Add(CommandController.Instance.CreateCommand (ActionListEnum.Destroy, hitObject));
+				
+				GuiController.OnClickedMenu += OnMenuClick;
+				GuiController.CreateMenu(hitObject, commandIds);
+			}
 		}
 	}
 	
